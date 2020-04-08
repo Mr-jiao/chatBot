@@ -43,14 +43,15 @@ async function onMessage (msg) {
   const contact = msg.from()
   const text = msg.text()
   const room = msg.room()
-  const toContact = msg.to()
-  const msyType = msg.type()
   const isSelf = msg.self()
-  const contactList = await msg.mention()
-  
+
   if (room) {
     const topic = await room.topic()
-    console.log(`Room: ${topic} Contact: ${contact.name()} Text: ${text}`)
+    console.log(`Room: ${topic} ContactFrom: ${contact.name()} Text: ${text}`)
+
+    if (isSelf) {
+      return
+    }
 
     if (topic === '随随便便') {
       const options = {
@@ -61,15 +62,14 @@ async function onMessage (msg) {
       }
 
       const req = http.request(options, (res) => {
-          let resText = ''
-          res.on('data', (chunk) => {
-            console.log('chunk: ', JSON.parse(chunk.toString()))
-            resText += JSON.parse(chunk.toString()).msg
-          })
+        let resText = ''
+        res.on('data', (chunk) => {
+          resText += JSON.parse(chunk.toString()).msg
+        })
 
-          res.on('end', () => {
-            msg.say(resText)
-          })
+        res.on('end', () => {
+          msg.say(resText)
+        })
       })
 
       req.on('error', (e) => {
@@ -78,14 +78,7 @@ async function onMessage (msg) {
       req.end();
     }
   } else {
-    console.log(`Contact: ${contact.name()} Text: ${text}`)
-  }
-
-  if (toContact) {
-    const name = toContact.name()
-    console.log(`toContact: ${name} Contact: ${contact.name()} Text: ${text}`)
-  } else {
-    console.log(`Contact: ${contact.name()} Text: ${text}`)
+    console.log(`ContactFrom: ${contact.name()} Text: ${text}`)
   }
 }
 
